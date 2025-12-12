@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>IA & Sem Marks Calculator — Made by Nagendra</title>
+  <style>
+    :root{
+      --bg1:#fff7cc; /* pale yellow */
+      --bg2:#ffecd1; /* soft orange */
+      --card:#ffffff;
+      --muted:#374151;
+      --accent1:#ef4444; /* red */
+      --accent2:#10b981; /* green */
+      --accent3:#f59e0b; /* amber */
+      --focus: rgba(239,68,68,0.12);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;background:linear-gradient(135deg,var(--bg1),var(--bg2));color:#111827;min-height:100vh}
+    .container{max-width:980px;margin:28px auto;padding:18px}
+    header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+    h1{margin:0;font-size:20px}
+    .brand{display:flex;gap:12px;align-items:center}
+    .logo{width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,var(--accent3),var(--accent2));display:flex;align-items:center;justify-content:center;font-weight:800;color:#042a2b;box-shadow:0 8px 24px rgba(16,185,129,0.12);animation:logoFloat 5s ease-in-out infinite}
+    @keyframes logoFloat{0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)}}
+
+    .card{background:var(--card);padding:16px;border-radius:12px;margin-bottom:14px;border:1px solid rgba(0,0,0,0.06);box-shadow:0 8px 24px rgba(15,23,42,0.04);transition:transform .18s ease,box-shadow .18s}
+    .card:hover{transform:translateY(-4px)}
+
+    label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+    input[type=text], input[type=number]{padding:12px;border-radius:10px;border:2px solid rgba(0,0,0,0.06);background:linear-gradient(180deg,#ffffff,#fbfbfb);color:inherit;width:100%;outline:none;font-weight:700;font-size:15px}
+    input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
+    .row{display:flex;gap:12px}
+    .col{flex:1}
+
+    .btn{padding:10px 14px;border-radius:10px;border:none;cursor:pointer;font-weight:700}
+    .btn-primary{background:linear-gradient(90deg,var(--accent3),var(--accent2));color:#042a2b}
+    .btn-ghost{background:transparent;border:1px solid rgba(0,0,0,0.06);color:var(--muted)}
+
+    .subjects-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+    .subject{padding:12px;border-radius:10px;background:linear-gradient(180deg,#fff,#fff);cursor:pointer;border:1px solid rgba(0,0,0,0.04);transition:transform .2s cubic-bezier(.2,.9,.3,1),box-shadow .2s}
+    .subject:hover{transform:translateY(-8px);box-shadow:0 18px 40px rgba(15,23,42,0.06)}
+    .subject h3{margin:0;font-size:15px}
+    .subject p{margin:6px 0 0;color:var(--muted);font-size:13px}
+
+    .inputs{margin-top:12px;display:none;gap:10px}
+    .inputs.show{display:grid;grid-template-columns:1fr 1fr 1fr;align-items:end}
+
+    .input-box{background:linear-gradient(180deg,#fff,#fbfbfb);padding:10px;border-radius:10px;border:1px solid rgba(0,0,0,0.04);box-shadow:0 6px 18px rgba(2,6,23,0.04)}
+    .input-box label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+    .input-small{font-size:15px;padding:10px}
+    .hint{font-size:12px;color:var(--muted);margin-top:8px}
+    .error{color:var(--accent1);font-size:12px;margin-top:6px;display:none}
+
+    .subject.active{box-shadow:0 20px 48px rgba(16,185,129,0.08);transform:translateY(-10px);border:2px solid rgba(16,185,129,0.12)}
+    input:focus{box-shadow:0 8px 28px var(--focus);border-color:var(--accent1)}
+
+    .results{display:flex;flex-direction:column;gap:10px}
+    .result-row{display:flex;justify-content:space-between;align-items:center;padding:12px;border-radius:10px;background:linear-gradient(180deg,#fff,#fff);border:1px solid rgba(0,0,0,0.04)}
+    .big{font-size:20px;font-weight:800}
+    .muted{color:var(--muted)}
+
+    .footer{display:flex;justify-content:space-between;align-items:center;margin-top:12px;color:var(--muted);font-size:13px}
+
+    .corner-credit{position:fixed;right:12px;bottom:12px;background:linear-gradient(90deg,#fff,#fff);padding:8px 12px;border-radius:10px;border:1px solid rgba(0,0,0,0.04);font-size:12px;color:var(--muted);box-shadow:0 8px 20px rgba(2,6,23,0.04)}
+
+    @media(max-width:720px){.inputs.show{grid-template-columns:1fr}}
+
+    /* print styles for clean PDF */
+    @media print{
+      body{background:white;color:black}
+      .card{box-shadow:none;background:white;border:none}
+      .logo{display:none}
+      .btn, .corner-credit, #saveBtn, #downloadBtn, #calcBtn {display:none}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="brand">
+        <div class="logo">IA</div>
+        <div>
+          <h1>IA & SEM Calculator</h1>
+          <div class="muted">Fast — Accurate — User-friendly</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <button class="btn btn-ghost" id="saveBtn">Save</button>
+        <button class="btn btn-primary" id="downloadPdfBtn">Download PDF</button>
+        <button class="btn btn-primary" id="downloadBtn">Download CSV</button>
+      </div>
+    </header>
+
+    <!-- Student Info Card -->
+    <div class="card">
+      <label for="stuName">Student Name</label>
+      <input type="text" id="stuName" placeholder="Enter name (e.g., Nagendra)" />
+      <div style="height:10px"></div>
+      <label for="usn">USN</label>
+      <input type="text" id="usn" placeholder="Enter USN (e.g., 1PE20EE001)" />
+    </div>
+
+    <!-- Subjects List -->
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div>
+          <h2 style="margin:0;font-size:16px">Subjects</h2>
+          <div class="hint">Click a subject to enter CIE1, CIE2 (/50) and SEM (/100)</div>
+        </div>
+        <div>
+          <button class="btn btn-primary" id="calcBtn">Calculate All</button>
+        </div>
+      </div>
+
+      <div class="subjects-list" id="subjectsContainer"></div>
+    </div>
+
+    <!-- Results -->
+    <div class="card" id="resultsCard" style="display:none">
+      <h2 style="margin:0 0 8px 0">Calculated Results</h2>
+      <div class="results" id="resultsList"></div>
+      <div style="height:12px"></div>
+      <div class="result-row">
+        <div class="muted">Overall Average (per subject average)</div>
+        <div id="overallAvg" class="big">--</div>
+      </div>
+      <div style="height:10px"></div>
+      <div style="text-align:center;color:var(--muted);font-size:13px">Made by me — <strong>NAGENDRA</strong> • EEE Mandya</div>
+    </div>
+
+    <div class="footer">
+      <div class="muted">Method: IA avg = round((CIE1 + CIE2)/2) out of 50. SEM_converted = round(SEM/2) out of 50. Subject total = IA_avg + SEM_converted (out of 100).</div>
+      <div class="muted">Made for PESCE</div>
+    </div>
+  </div>
+
+  <div class="corner-credit">Made by Nagendra — EEE Mandya</div>
+
+  <script>
+    const subjects = [
+      "STRATEGIC MANAGEMENT & ELECTRICAL ESTIMATION",
+      "POWER SYSTEM ANALYSIS AND STABILITY",
+      "MEASUREMENT AND INSTRUMENTATION",
+      "POWER ELECTRONICS",
+      "SOLAR PV SYSTEM",
+      "EMPLOYABILITY AND ENHANCEMENT SKILLS V"
+    ];
+
+    const container = document.getElementById('subjectsContainer');
+    const saved = JSON.parse(localStorage.getItem('ia_data') || '{}');
+    document.getElementById('stuName').value = saved.name || '';
+    document.getElementById('usn').value = saved.usn || '';
+
+    function makeSubjectCard(name, idx){
+      const div = document.createElement('div');
+      div.className = 'subject';
+      div.dataset.idx = idx;
+      div.innerHTML = `
+        <h3>${name}</h3>
+        <p class="muted">Click to enter marks</p>
+        <div class="inputs" id="inputs-${idx}">
+          <div class="input-box">
+            <label for="cie1-${idx}">CIE 1 (/50)</label>
+            <input class="input-small" type="number" min="0" max="50" id="cie1-${idx}" placeholder="e.g., 40" aria-label="CIE 1" />
+            <div id="err-cie1-${idx}" class="error">Must be between 0 and 50</div>
+          </div>
+          <div class="input-box">
+            <label for="cie2-${idx}">CIE 2 (/50)</label>
+            <input class="input-small" type="number" min="0" max="50" id="cie2-${idx}" placeholder="e.g., 41" aria-label="CIE 2" />
+            <div id="err-cie2-${idx}" class="error">Must be between 0 and 50</div>
+          </div>
+          <div class="input-box">
+            <label for="sem-${idx}">SEM (/100)</label>
+            <input class="input-small" type="number" min="0" max="100" id="sem-${idx}" placeholder="e.g., 75" aria-label="SEM" />
+            <div id="err-sem-${idx}" class="error">Must be between 0 and 100</div>
+          </div>
+          <div class="hint">Tip: Click any input to highlight. Values above max will be clamped on blur.</div>
+        </div>`;
+
+      container.appendChild(div);
+
+      // Toggle inputs but ignore clicks inside inputs
+      div.addEventListener('click', (e)=>{
+        if(e.target.tagName.toLowerCase()==='input') return;
+        const inputs = document.getElementById(`inputs-${idx}`);
+        inputs.classList.toggle('show');
+        // populate saved if present
+        const d = saved.subjects && saved.subjects[idx];
+        if(d){
+          document.getElementById(`cie1-${idx}`).value = d.cie1;
+          document.getElementById(`cie2-${idx}`).value = d.cie2;
+          document.getElementById(`sem-${idx}`).value = d.sem;
+        }
+      });
+
+      // validation events
+      const cie1El = div.querySelector(`#cie1-${idx}`);
+      const cie2El = div.querySelector(`#cie2-${idx}`);
+      const semEl = div.querySelector(`#sem-${idx}`);
+
+      function validateNumber(el, max, errSelector){
+        const err = div.querySelector(`#${errSelector}`);
+        if(!err) return;
+        err.style.display = 'none';
+        el.addEventListener('input', ()=>{
+          const v = el.value === '' ? '' : Number(el.value);
+          if(v === '' ) { err.style.display='none'; return; }
+          if(Number.isNaN(v) || v < 0 || v > max){ err.style.display='block'; } else { err.style.display='none'; }
+        });
+
+        // on blur, clamp value
+        el.addEventListener('blur', ()=>{
+          let v = el.value === '' ? '' : Number(el.value);
+          if(v === '') return;
+          if(v > max) { el.value = max; err.style.display='block'; }
+          if(v < 0) el.value = 0;
+        });
+      }
+
+      validateNumber(cie1El,50,`err-cie1-${idx}`);
+      validateNumber(cie2El,50,`err-cie2-${idx}`);
+      validateNumber(semEl,100,`err-sem-${idx}`);
+    }
+
+    // create all subject cards
+    subjects.forEach((s,i)=>makeSubjectCard(s,i));
+
+    // highlight subject when any input inside it receives focus
+    document.addEventListener('focusin', (e)=>{
+      const el = e.target;
+      if(!el || el.tagName.toLowerCase() !== 'input') return;
+      const id = el.id; // format cie1-0, sem-2 etc
+      const parts = id.split('-');
+      if(parts.length<2) return;
+      const idx = parts[1];
+      // remove active from all
+      document.querySelectorAll('.subject').forEach(s=>s.classList.remove('active'));
+      const subj = document.querySelector(`.subject[data-idx="${idx}"]`);
+      if(subj) subj.classList.add('active');
+    });
+    document.addEventListener('focusout', (e)=>{
+      // Remove active after small delay so users can still see
+      setTimeout(()=>document.querySelectorAll('.subject').forEach(s=>s.classList.remove('active')),120);
+    });
+
+    // Calculation logic
+    function roundSpecial(x){ return Math.round(x); }
+
+    function calculateAll(){
+      const results = [];
+      for(let i=0;i<subjects.length;i++){
+        const cie1El = document.getElementById(`cie1-${i}`);
+        const cie2El = document.getElementById(`cie2-${i}`);
+        const semEl = document.getElementById(`sem-${i}`);
+        const cie1 = cie1El && cie1El.value !== '' ? Number(cie1El.value) : null;
+        const cie2 = cie2El && cie2El.value !== '' ? Number(cie2El.value) : null;
+        const sem = semEl && semEl.value !== '' ? Number(semEl.value) : null;
+
+        const validCie1 = cie1 === null ? 0 : Math.max(0, Math.min(50, cie1));
+        const validCie2 = cie2 === null ? 0 : Math.max(0, Math.min(50, cie2));
+        const validSem = sem === null ? 0 : Math.max(0, Math.min(100, sem));
+
+        const iaAvg = roundSpecial((validCie1 + validCie2)/2);
+        const sem50 = roundSpecial(validSem/2);
+        const total = iaAvg + sem50;
+
+        results.push({name: subjects[i], cie1: validCie1, cie2: validCie2, sem: validSem, iaAvg, sem50, total});
+      }
+
+      // Show results
+      const resultsCard = document.getElementById('resultsCard');
+      const resultsList = document.getElementById('resultsList');
+      resultsList.innerHTML = '';
+      results.forEach(r=>{
+        const row = document.createElement('div');
+        row.className = 'result-row';
+        const lowStyle = r.total < 40 ? 'color:var(--accent1)' : 'color:inherit';
+        row.innerHTML = `<div style="flex:1"><div style="font-weight:800">${r.name}</div><div class="muted">IA: ${r.iaAvg}/50 &nbsp; SEM(/50): ${r.sem50}/50</div></div><div style="text-align:right;margin-left:12px"><div class="big" style="${lowStyle}">${r.total}/100</div><div class="muted" style="font-size:12px">Subject Total</div></div>`;
+        resultsList.appendChild(row);
+      });
+
+      const overall = results.length ? Math.round(results.reduce((a,b)=>a+b.total,0)/results.length) : 0;
+      document.getElementById('overallAvg').textContent = overall + ' / 100';
+      resultsCard.style.display = 'block';
+      window._lastResults = results;
+    }
+
+    document.getElementById('calcBtn').addEventListener('click', ()=>{ calculateAll(); });
+
+    // Save to localStorage
+    document.getElementById('saveBtn').addEventListener('click', ()=>{
+      const data = {name:document.getElementById('stuName').value, usn:document.getElementById('usn').value, subjects:[]};
+      for(let i=0;i<subjects.length;i++){
+        data.subjects.push({cie1:document.getElementById(`cie1-${i}`)?.value||'', cie2:document.getElementById(`cie2-${i}`)?.value||'', sem:document.getElementById(`sem-${i}`)?.value||''});
+      }
+      localStorage.setItem('ia_data',JSON.stringify(data));
+      alert('Saved locally ✅');
+    });
+
+    // Download CSV
+    document.getElementById('downloadBtn').addEventListener('click', ()=>{
+      if(!window._lastResults) calculateAll();
+      const name = document.getElementById('stuName').value || 'Student';
+      const usn = document.getElementById('usn').value || '';
+      const rows = [['Name','USN','Subject','CIE1(/50)','CIE2(/50)','IA_avg(/50)','SEM(/100)','SEM_converted(/50)','Total(/100)']];
+      window._lastResults.forEach(r=>rows.push([name,usn,r.name,r.cie1,r.cie2,r.iaAvg,r.sem,r.sem50,r.total]));
+      const csv = rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+      const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = `${name.replace(/\s+/g,'_')}_IA_Sem_Results.csv`; a.click(); URL.revokeObjectURL(url);
+    });
+
+    // Download PDF: minimal subject list and totals, with signature
+    document.getElementById('downloadPdfBtn').addEventListener('click', ()=>{
+      if(!window._lastResults) calculateAll();
+      const name = document.getElementById('stuName').value || 'Student';
+      const usn = document.getElementById('usn').value || '';
+      const results = window._lastResults || [];
+      const html = `<!doctype html><html><head><meta charset="utf-8"><title>Marks - ${name}</title><style>body{font-family:Arial,Helvetica,sans-serif;padding:20px;color:#041025}h2{margin-bottom:6px}table{width:100%;border-collapse:collapse;margin-top:12px}td,th{padding:8px;border:1px solid #ddd;text-align:left}thead{background:#f3f4f6}.center{text-align:center}.signature{margin-top:20px;font-family:'Brush Script MT',cursive;font-size:20px}</style></head><body><h2>IA & SEM Results</h2><div><strong>Name:</strong> ${escapeHtml(name)} &nbsp;&nbsp; <strong>USN:</strong> ${escapeHtml(usn)}</div><table><thead><tr><th>Subject</th><th>Total (/100)</th></tr></thead><tbody>${results.map(r=>`<tr><td>${escapeHtml(r.name)}</td><td class="center">${r.total}</td></tr>`).join('')}</tbody></table><div style="margin-top:12px"><strong>Overall Average:</strong> ${escapeHtml(document.getElementById('overallAvg').textContent || '')}</div><div class="signature">Signature: <strong>Nagendra</strong></div></body></html>`;
+      const win = window.open('', '_blank'); win.document.open(); win.document.write(html); win.document.close(); win.focus(); setTimeout(()=>win.print(),200);
+    });
+
+    function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+    // Auto-calc when inputs change (debounced)
+    document.addEventListener('input', (e)=>{
+      if(e.target && e.target.tagName.toLowerCase()==='input' && e.target.type==='number'){
+        clearTimeout(window._calcTimer);
+        window._calcTimer = setTimeout(()=>calculateAll(),600);
+      }
+    });
+
+    // initial calculate if saved
+    if(saved && saved.subjects){ setTimeout(()=>{ calculateAll(); },300); }
+  </script>
+</body>
+</html>
